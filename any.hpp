@@ -12,7 +12,6 @@ namespace MCNH
 		
 		struct Placeholder
 		{
-			virtual void* GetValue() = 0;
 			virtual const std::type_info& GetTypeid() = 0;
 			virtual ~Placeholder()
 			{}
@@ -22,15 +21,8 @@ namespace MCNH
 		struct ConcretePlaceholder : public Placeholder
 		{
 
-			using type = T;
-
 			ConcretePlaceholder(T&& value) : value(std::move(value))
 			{}
-
-			void* GetValue() override
-			{
-				return reinterpret_cast<void*>(&value);		
-			}
 
 			const std::type_info& GetTypeid() override
 			{
@@ -64,7 +56,10 @@ namespace MCNH
 			{
 				throw BadCastException{};
 			}
-			return *reinterpret_cast<T*>(data->GetValue());
+			else
+			{
+				return dynamic_cast<ConcretePlaceholder<T>*>(data.get())->value;
+			}
 		}
 	};
 }
